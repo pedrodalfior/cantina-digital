@@ -1,4 +1,5 @@
 🚀 Sistema de Cantina Escolar (Dockerizado) 🚀
+Projeto de desenvolvimento próprio voltado para estudar novos métodos de desenvolvimento e para integração de novas habilidades na faculdade.
 Este projeto visa gerar o código inicial de um sistema de cantina escolar completo, com backend em Spring Boot e frontend em Angular, ambos preparados para serem executados em Docker e com classes/métodos nomeados em português (PT-BR).
 
 ✨ Estrutura do Projeto ✨
