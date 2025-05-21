@@ -1,9 +1,17 @@
-Cantina Digital: Sistema de Gerenciamento
-Este é um sistema desenvolvido para otimizar o gerenciamento de cantinas, tornando o processo de pedidos, pagamentos e controle de estoque mais eficiente e moderno.
+🚀 Sistema de Cantina Escolar (Dockerizado) 🚀
+Este projeto visa gerar o código inicial de um sistema de cantina escolar completo, com backend em Spring Boot e frontend em Angular, ambos preparados para serem executados em Docker e com classes/métodos nomeados em português (PT-BR).
 
-Funcionalidades
-Gestão de Pedidos: Permite que os clientes façam pedidos de forma digital, agilizando o atendimento.
-Controle de Estoque: Monitora a disponibilidade de produtos em tempo real, evitando a falta de itens populares e o desperdício.
-Processamento de Pagamentos: Integração com métodos de pagamento eletrônicos para maior comodidade e segurança.
-Relatórios e Análises: Geração de relatórios detalhados sobre vendas, produtos mais vendidos e desempenho geral da cantina.
-Perfis de Usuário: Diferentes níveis de acesso para administradores, funcionários e clientes.
+✨ Estrutura do Projeto ✨
+O projeto será dividido em três componentes principais, orquestrados via Docker Compose:
+
+Backend (Spring Boot): ☕ Lógica de negócio, API RESTful e persistência de dados.
+Frontend (Angular): 🅰️ Interface do usuário e comunicação com o backend.
+Banco de Dados (PostgreSQL): 🐘 Armazenamento das informações do sistema.
+Backend (Spring Boot)
+O backend será desenvolvido com Spring Boot, utilizando Java 17+ e as seguintes dependências:
+
+Spring Web: 🌐 Para a criação de APIs RESTful.
+Spring Data JPA: 💾 Para interação com o banco de dados.
+PostgreSQL Driver: 🔗 Driver de conexão com o PostgreSQL.
+Spring Security (com JWT): 🔒 Para autenticação e autorização de usuários.
+Lombok: 🛠️ Para reduzir o boilerplate code (getters, setters, construtores, etc.).
