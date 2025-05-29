@@ -1,5 +1,6 @@
 package com.cantina.entity;
 
+import com.cantina.model.Produto;
 import jakarta.persistence.*;
 import lombok.*;
 

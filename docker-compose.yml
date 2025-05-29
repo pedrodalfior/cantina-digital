@@ -2,50 +2,42 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15-alpine
-    container_name: cantina-postgres
+    image: postgres:14
+    container_name: cantina-db
     environment:
-      POSTGRES_DB: cantina_db
+      POSTGRES_DB: cantina
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - cantina-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: cantina-backend
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cantina_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cantina
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
     ports:
       - "8080:8080"
-    networks:
-      - cantina-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    build: ./frontend
     container_name: cantina-frontend
     ports:
-      - "4200:80"
+      - "3000:3000"
     depends_on:
       - backend
-    networks:
-      - cantina-network
-
-networks:
-  cantina-network:
-    driver: bridge
 
 volumes:
   postgres_data: 

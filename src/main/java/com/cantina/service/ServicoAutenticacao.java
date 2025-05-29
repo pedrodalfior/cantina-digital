@@ -40,12 +40,10 @@ public class ServicoAutenticacao {
     }
 
     public String autenticar(LoginDTO loginDTO) {
-        Optional<Usuario> usuarioOpt = usuarioRepositorio.findByNomeDeUsuario(loginDTO.getNomeDeUsuarioOuEmail());
+        Optional<Usuario> usuarioOpt = usuarioRepositorio.findByEmail(loginDTO.getEmail());
+        
         if (usuarioOpt.isEmpty()) {
-            usuarioOpt = usuarioRepositorio.findByEmail(loginDTO.getNomeDeUsuarioOuEmail());
-        }
-        if (usuarioOpt.isEmpty()) {
-            throw new RuntimeException("Usuário ou email inválido");
+            throw new RuntimeException("Email inválido");
         }
 
         Usuario usuario = usuarioOpt.get();

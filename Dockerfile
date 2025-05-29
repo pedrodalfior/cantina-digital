@@ -1,15 +1,15 @@
-FROM eclipse-temurin:21-jdk-alpine as build
-WORKDIR /workspace/app
+FROM maven:3.8.4-openjdk-17 AS build
 
-COPY mvnw .
-COPY .mvn .mvn
+WORKDIR /app
 COPY pom.xml .
-COPY src src
+COPY src ./src
 
-RUN chmod +x ./mvnw
-RUN ./mvnw install -DskipTests
+RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine
-VOLUME /tmp
-COPY --from=build /workspace/app/target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar"] 
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"] 
