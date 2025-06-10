@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -12,6 +11,7 @@ import { AuthService } from '../../services/auth.service';
         <mat-card-header>
           <mat-card-title>Login</mat-card-title>
         </mat-card-header>
+        
         <mat-card-content>
           <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline">
@@ -38,8 +38,11 @@ import { AuthService } from '../../services/auth.service';
             </button>
           </form>
         </mat-card-content>
+        
         <mat-card-actions>
-          <button mat-button routerLink="/registro">Não tem uma conta? Registre-se</button>
+          <button mat-button (click)="irParaRegistro()">
+            Não tem uma conta? Registre-se
+          </button>
         </mat-card-actions>
       </mat-card>
     </div>
@@ -49,21 +52,34 @@ import { AuthService } from '../../services/auth.service';
       display: flex;
       justify-content: center;
       align-items: center;
-      height: calc(100vh - 100px);
+      height: 100vh;
+      background-color: #f5f5f5;
     }
+    
     mat-card {
       max-width: 400px;
-      width: 100%;
+      width: 90%;
       padding: 20px;
     }
+    
     form {
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
+    
+    mat-form-field {
+      width: 100%;
+    }
+    
+    button[type="submit"] {
+      margin-top: 16px;
+    }
+    
     mat-card-actions {
       display: flex;
       justify-content: center;
+      margin-top: 16px;
     }
   `]
 })
@@ -73,28 +89,29 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private snackBar: MatSnackBar
+    private router: Router
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      senha: ['', [Validators.required]]
+      senha: ['', Validators.required]
     });
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
-        next: (response) => {
-          localStorage.setItem('token', response.token);
-          this.router.navigate(['/produtos']);
+        next: () => {
+          this.router.navigate(['/home']);
         },
         error: (error) => {
-          this.snackBar.open('Erro ao fazer login. Verifique suas credenciais.', 'Fechar', {
-            duration: 3000
-          });
+          console.error('Erro no login:', error);
+          // Aqui você pode adicionar uma mensagem de erro para o usuário
         }
       });
     }
+  }
+
+  irParaRegistro(): void {
+    this.router.navigate(['/registro']);
   }
 } 

@@ -1,38 +1,59 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { tap } from 'rxjs/operators';
+
+export interface LoginDTO {
+  email: string;
+  senha: string;
+}
+
+export interface RegistroDTO {
+  nome: string;
+  sobrenome: string;
+  email: string;
+  senha: string;
+}
+
+export interface RespostaAutenticacaoDTO {
+  token: string;
+  tipoToken: string;
+  email: string;
+  nome: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/auth`;
+  private apiUrl = 'http://localhost:8080/api/auth';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  login(credentials: { email: string; senha: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
+  login(credentials: LoginDTO): Observable<RespostaAutenticacaoDTO> {
+    return this.http.post<RespostaAutenticacaoDTO>(`${this.apiUrl}/login`, credentials)
+      .pipe(
+        tap(response => {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('email', response.email);
+        })
+      );
   }
 
-  registro(userData: { 
-    nome: string; 
-    sobrenome: string; 
-    email: string; 
-    senha: string 
-  }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/registro`, userData);
+  registrar(userData: RegistroDTO): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/registrar`, userData);
   }
 
   logout(): void {
     localStorage.removeItem('token');
+    localStorage.removeItem('email');
   }
 
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  isAuthenticated(): boolean {
+  isLoggedIn(): boolean {
     return !!this.getToken();
   }
 } 

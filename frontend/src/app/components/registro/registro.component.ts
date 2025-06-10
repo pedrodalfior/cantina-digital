@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -12,6 +11,7 @@ import { AuthService } from '../../services/auth.service';
         <mat-card-header>
           <mat-card-title>Registro</mat-card-title>
         </mat-card-header>
+        
         <mat-card-content>
           <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline">
@@ -54,8 +54,11 @@ import { AuthService } from '../../services/auth.service';
             </button>
           </form>
         </mat-card-content>
+        
         <mat-card-actions>
-          <button mat-button routerLink="/login">Já tem uma conta? Faça login</button>
+          <button mat-button (click)="irParaLogin()">
+            Já tem uma conta? Faça login
+          </button>
         </mat-card-actions>
       </mat-card>
     </div>
@@ -65,21 +68,34 @@ import { AuthService } from '../../services/auth.service';
       display: flex;
       justify-content: center;
       align-items: center;
-      height: calc(100vh - 100px);
+      height: 100vh;
+      background-color: #f5f5f5;
     }
+    
     mat-card {
       max-width: 400px;
-      width: 100%;
+      width: 90%;
       padding: 20px;
     }
+    
     form {
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
+    
+    mat-form-field {
+      width: 100%;
+    }
+    
+    button[type="submit"] {
+      margin-top: 16px;
+    }
+    
     mat-card-actions {
       display: flex;
       justify-content: center;
+      margin-top: 16px;
     }
   `]
 })
@@ -89,32 +105,31 @@ export class RegistroComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private snackBar: MatSnackBar
+    private router: Router
   ) {
     this.registroForm = this.fb.group({
       nome: ['', Validators.required],
       sobrenome: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      senha: ['', [Validators.required]]
+      senha: ['', Validators.required]
     });
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.registroForm.valid) {
-      this.authService.registro(this.registroForm.value).subscribe({
+      this.authService.registrar(this.registroForm.value).subscribe({
         next: () => {
-          this.snackBar.open('Registro realizado com sucesso!', 'Fechar', {
-            duration: 3000
-          });
           this.router.navigate(['/login']);
         },
         error: (error) => {
-          this.snackBar.open('Erro ao realizar registro. Tente novamente.', 'Fechar', {
-            duration: 3000
-          });
+          console.error('Erro no registro:', error);
+          // Aqui você pode adicionar uma mensagem de erro para o usuário
         }
       });
     }
+  }
+
+  irParaLogin(): void {
+    this.router.navigate(['/login']);
   }
 } 
