@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -32,7 +33,7 @@ import { AuthService } from '../../services/auth.service';
 
             <mat-form-field appearance="outline">
               <mat-label>Email</mat-label>
-              <input matInput type="email" formControlName="email" required>
+              <input matInput formControlName="email" type="email" required>
               <mat-error *ngIf="registroForm.get('email')?.hasError('required')">
                 Email é obrigatório
               </mat-error>
@@ -43,59 +44,56 @@ import { AuthService } from '../../services/auth.service';
 
             <mat-form-field appearance="outline">
               <mat-label>Senha</mat-label>
-              <input matInput type="password" formControlName="senha" required>
+              <input matInput formControlName="senha" type="password" required>
               <mat-error *ngIf="registroForm.get('senha')?.hasError('required')">
                 Senha é obrigatória
               </mat-error>
             </mat-form-field>
 
-            <button mat-raised-button color="primary" type="submit" [disabled]="registroForm.invalid">
-              Registrar
-            </button>
+            <div class="form-actions">
+              <button mat-raised-button color="primary" type="submit" [disabled]="registroForm.invalid">
+                Registrar
+              </button>
+              <button mat-button type="button" routerLink="/login">
+                Voltar para login
+              </button>
+            </div>
           </form>
         </mat-card-content>
-        
-        <mat-card-actions>
-          <button mat-button (click)="irParaLogin()">
-            Já tem uma conta? Faça login
-          </button>
-        </mat-card-actions>
       </mat-card>
     </div>
   `,
   styles: [`
     .registro-container {
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
       background-color: #f5f5f5;
     }
     
     mat-card {
       max-width: 400px;
       width: 90%;
-      padding: 20px;
+      margin: 2rem;
     }
     
     form {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
     }
     
     mat-form-field {
       width: 100%;
-    }
-    
-    button[type="submit"] {
-      margin-top: 16px;
-    }
-    
-    mat-card-actions {
-      display: flex;
-      justify-content: center;
-      margin-top: 16px;
     }
   `]
 })
@@ -105,7 +103,8 @@ export class RegistroComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {
     this.registroForm = this.fb.group({
       nome: ['', Validators.required],
@@ -115,21 +114,22 @@ export class RegistroComponent {
     });
   }
 
-  onSubmit(): void {
+  onSubmit() {
     if (this.registroForm.valid) {
-      this.authService.registrar(this.registroForm.value).subscribe({
+      this.authService.register(this.registroForm.value).subscribe({
         next: () => {
+          this.snackBar.open('Registro realizado com sucesso!', 'Fechar', {
+            duration: 3000
+          });
           this.router.navigate(['/login']);
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Erro no registro:', error);
-          // Aqui você pode adicionar uma mensagem de erro para o usuário
+          this.snackBar.open('Erro ao realizar registro', 'Fechar', {
+            duration: 3000
+          });
         }
       });
     }
-  }
-
-  irParaLogin(): void {
-    this.router.navigate(['/login']);
   }
 } 

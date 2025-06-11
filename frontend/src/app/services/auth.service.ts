@@ -1,25 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Router } from '@angular/router';
 
-export interface LoginDTO {
-  email: string;
-  senha: string;
-}
-
-export interface RegistroDTO {
-  nome: string;
-  sobrenome: string;
-  email: string;
-  senha: string;
-}
-
-export interface RespostaAutenticacaoDTO {
+interface AuthResponse {
   token: string;
-  tipoToken: string;
-  email: string;
-  nome: string;
+  usuario: {
+    id: number;
+    nome: string;
+    email: string;
+    tipoUsuario: string;
+  };
 }
 
 @Injectable({
@@ -27,33 +18,59 @@ export interface RespostaAutenticacaoDTO {
 })
 export class AuthService {
   private apiUrl = 'http://localhost:8080/api/auth';
+  private tokenKey = 'auth_token';
+  private userKey = 'user_data';
+  private _isLoggedIn = new BehaviorSubject<boolean>(false);
+  isLoggedIn$ = this._isLoggedIn.asObservable();
 
-  constructor(private http: HttpClient) { }
-
-  login(credentials: LoginDTO): Observable<RespostaAutenticacaoDTO> {
-    return this.http.post<RespostaAutenticacaoDTO>(`${this.apiUrl}/login`, credentials)
-      .pipe(
-        tap(response => {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('email', response.email);
-        })
-      );
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
+    this._isLoggedIn.next(!!this.getToken());
   }
 
-  registrar(userData: RegistroDTO): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/registrar`, userData);
+  login(email: string, senha: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, senha }).pipe(
+      tap(response => {
+        localStorage.setItem(this.tokenKey, response.token);
+        localStorage.setItem(this.userKey, JSON.stringify(response.usuario));
+        this._isLoggedIn.next(true);
+      })
+    );
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('email');
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    this._isLoggedIn.next(false);
+    this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  getUserData(): any {
+    const userData = localStorage.getItem(this.userKey);
+    return userData ? JSON.parse(userData) : null;
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    return this._isLoggedIn.value;
+  }
+
+  isAdmin(): boolean {
+    const userData = this.getUserData();
+    return userData?.tipoUsuario === 'ADMIN';
+  }
+
+  register(userData: {
+    nome: string;
+    sobrenome: string;
+    email: string;
+    senha: string;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, userData);
   }
 } 

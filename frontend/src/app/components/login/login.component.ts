@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -11,12 +12,12 @@ import { AuthService } from '../../services/auth.service';
         <mat-card-header>
           <mat-card-title>Login</mat-card-title>
         </mat-card-header>
-        
+
         <mat-card-content>
           <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline">
               <mat-label>Email</mat-label>
-              <input matInput type="email" formControlName="email" required>
+              <input matInput formControlName="email" type="email" required>
               <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
                 Email é obrigatório
               </mat-error>
@@ -27,69 +28,67 @@ import { AuthService } from '../../services/auth.service';
 
             <mat-form-field appearance="outline">
               <mat-label>Senha</mat-label>
-              <input matInput type="password" formControlName="senha" required>
+              <input matInput formControlName="senha" type="password" required>
               <mat-error *ngIf="loginForm.get('senha')?.hasError('required')">
                 Senha é obrigatória
               </mat-error>
             </mat-form-field>
 
-            <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">
-              Entrar
-            </button>
+            <div class="form-actions">
+              <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">
+                Entrar
+              </button>
+              <button mat-button type="button" routerLink="/registro">
+                Criar conta
+              </button>
+            </div>
           </form>
         </mat-card-content>
-        
-        <mat-card-actions>
-          <button mat-button (click)="irParaRegistro()">
-            Não tem uma conta? Registre-se
-          </button>
-        </mat-card-actions>
       </mat-card>
     </div>
   `,
   styles: [`
     .login-container {
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
       background-color: #f5f5f5;
     }
-    
+
     mat-card {
       max-width: 400px;
       width: 90%;
-      padding: 20px;
+      margin: 2rem;
     }
-    
+
     form {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 1rem;
+      padding: 1rem 0;
     }
-    
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
     mat-form-field {
       width: 100%;
     }
-    
-    button[type="submit"] {
-      margin-top: 16px;
-    }
-    
-    mat-card-actions {
-      display: flex;
-      justify-content: center;
-      margin-top: 16px;
-    }
   `]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -97,21 +96,28 @@ export class LoginComponent {
     });
   }
 
-  onSubmit(): void {
+  ngOnInit() {
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/home']);
+    }
+  }
+
+  onSubmit() {
     if (this.loginForm.valid) {
-      this.authService.login(this.loginForm.value).subscribe({
+      const { email, senha } = this.loginForm.value;
+      this.authService.login(email, senha).subscribe({
         next: () => {
           this.router.navigate(['/home']);
         },
         error: (error) => {
           console.error('Erro no login:', error);
-          // Aqui você pode adicionar uma mensagem de erro para o usuário
+          this.snackBar.open('Email ou senha inválidos', 'Fechar', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
         }
       });
     }
-  }
-
-  irParaRegistro(): void {
-    this.router.navigate(['/registro']);
   }
 } 
